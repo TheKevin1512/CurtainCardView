@@ -1,8 +1,8 @@
 package dom.shimmer.view;
 
 import android.content.Context;
-import android.graphics.Color;
-import android.graphics.Paint;
+import android.content.res.ColorStateList;
+import android.content.res.TypedArray;
 import android.os.Handler;
 import android.support.annotation.AttrRes;
 import android.support.annotation.NonNull;
@@ -15,6 +15,8 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.RotateAnimation;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 
 import dom.shimmer.R;
 import dom.shimmer.adapter.IDomModel;
@@ -25,16 +27,16 @@ import dom.shimmer.model.DomModel;
  */
 
 public class DomCard extends FrameLayout {
-    private static final int RENDER_TIME = 25;
-    private static final String TAG = "DomCard";
-    private Paint paint;
+    private static final int RENDER_TIME = 24;
+
     private Handler handler;
     private Runnable animation;
     private CardView cardView;
     private FloatingActionButton button;
     private IDomModel model;
 
-    private ViewGroup shaderContainer;
+    private View shaderContainer;
+    private int icon = R.drawable.ic_open;
 
 
     public DomCard(@NonNull Context context) {
@@ -56,23 +58,19 @@ public class DomCard extends FrameLayout {
         this.model = new DomModel();
         View root = inflate(context, R.layout.card_layout, this);
         this.cardView = (CardView) root.findViewById(R.id.cardView);
-        this.paint = new Paint();
-        this.paint.setColor(Color.BLACK);
-        this.paint.setAlpha(60);
         this.handler = new Handler();
         this.button = (FloatingActionButton) root.findViewById(R.id.floatingActionButton);
         this.button.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
+                showShader(!model.isOpen());
                 Animation rotate;
                 if (model.isOpen()) {
-                    button.setImageResource(R.drawable.ic_open);
+                    button.setImageResource(icon);
                     rotate = new RotateAnimation(180, 0, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
-                    showShader(false);
                 } else {
                     button.setImageResource(R.drawable.ic_clear);
                     rotate = new RotateAnimation(0, 180, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
-                    showShader(true);
                 }
                 rotate.setDuration(300);
                 rotate.setFillAfter(true);
@@ -80,14 +78,31 @@ public class DomCard extends FrameLayout {
                 model.toggle();
             }
         });
+        if (attrs != null) {
+            TypedArray attributes = context.obtainStyledAttributes(attrs, R.styleable.DomCard);
+            int resId = attributes.getResourceId(R.styleable.DomCard_buttonIcon, 0);
+            if (resId != 0) {
+                this.button.setImageResource(resId);
+                this.icon = resId;
+            }
+            int color = attributes.getColor(R.styleable.DomCard_buttonColor, 0);
+            if (color != 0) {
+                button.setBackgroundTintList(ColorStateList.valueOf(color));
+            }
+            attributes.recycle();
+        }
+        this.shaderContainer = new LinearLayout(context);
+        this.shaderContainer.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, 0));
+        this.shaderContainer.setBackgroundColor(button.getBackgroundTintList().getDefaultColor());
     }
 
-    public ViewGroup getShaderContainer() {
+    public View getShaderContainer() {
         return shaderContainer;
     }
 
-    public void setShaderContainer(ViewGroup container) {
-        this.shaderContainer = container;
+    public void setShaderContainer(View view) {
+        if (view == null) return;
+        this.shaderContainer = view;
         this.shaderContainer.setBackgroundColor(button.getBackgroundTintList().getDefaultColor());
     }
 
@@ -101,15 +116,18 @@ public class DomCard extends FrameLayout {
             public void run() {
                 invalidate();
                 delta += 0.2;
-                if (enabled){
-                    if (params.height < cardView.getHeight()) {
-                        if (params.height == 0) params.height = 10;
+                if (enabled) {
+                    if (params.height < cardView.getMeasuredHeight()) {
+                        if (params.height <= 0) params.height = 10;
                         params.height = (int) (params.height * delta);
                         handler.postDelayed(this, RENDER_TIME);
                     } else {
+                        params.height = LayoutParams.MATCH_PARENT;
                         delta = 1.2f;
                     }
                 } else {
+                    if (params.height == LayoutParams.MATCH_PARENT)
+                        params.height = cardView.getHeight();
                     if (params.height > 0) {
                         params.height = (int) (params.height / delta);
                         handler.postDelayed(this, RENDER_TIME);
@@ -141,7 +159,11 @@ public class DomCard extends FrameLayout {
                             }
                         }
                         childViewHandler.postDelayed(this, 50);
-                    } else cardView.addView(shaderContainer);
+                    }
+                    else {
+                        cardView.addView(shaderContainer);
+                        shaderContainer.getLayoutParams().height = 0;
+                    }
                 }
             }, 50);
         }
@@ -149,5 +171,12 @@ public class DomCard extends FrameLayout {
 
     public void setModel(IDomModel model) {
         this.model = model;
+    }
+
+    @Override
+    public boolean performClick() {
+        if (shaderContainer.getLayoutParams() != null)
+            this.button.performClick();
+        return model.isOpening();
     }
 }

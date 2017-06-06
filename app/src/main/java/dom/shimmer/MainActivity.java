@@ -2,6 +2,7 @@ package dom.shimmer;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
@@ -18,10 +19,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
-        LinearLayout shaderContainer = new LinearLayout(this);
-        shaderContainer.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0));
-        shaderContainer.setOrientation(LinearLayout.VERTICAL);
-
-        domCard.setShaderContainer(shaderContainer);
+        View shaderContainer = ViewGroup.inflate(this, R.layout.shader_layout, null);
+//        domCard.setShaderContainer(shaderContainer);
+//        domCard.performClick();
     }
 }

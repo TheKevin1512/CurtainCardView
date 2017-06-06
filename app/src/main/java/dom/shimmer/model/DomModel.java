@@ -25,8 +25,4 @@ public class DomModel implements IDomModel {
     public boolean isOpening() {
         return this.isOpening;
     }
-
-    private void update(){
-
-    }
 }
