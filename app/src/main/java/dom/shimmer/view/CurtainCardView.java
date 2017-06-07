@@ -15,47 +15,43 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.RotateAnimation;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import dom.shimmer.R;
-import dom.shimmer.adapter.IDomModel;
-import dom.shimmer.model.DomModel;
 
 /**
  * Created by kevindom on 31/05/17.
  */
 
-public class DomCard extends FrameLayout {
+public class CurtainCardView extends FrameLayout {
     private static final int RENDER_TIME = 24;
 
     private Handler handler;
     private Runnable animation;
     private CardView cardView;
     private FloatingActionButton button;
-    private IDomModel model;
 
     private View shaderContainer;
     private int icon = R.drawable.ic_open;
+    private boolean isOpen;
 
 
-    public DomCard(@NonNull Context context) {
+    public CurtainCardView(@NonNull Context context) {
         super(context);
         init(context, null);
     }
 
-    public DomCard(@NonNull Context context, @Nullable AttributeSet attrs) {
+    public CurtainCardView(@NonNull Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         init(context, attrs);
     }
 
-    public DomCard(@NonNull Context context, @Nullable AttributeSet attrs, @AttrRes int defStyleAttr) {
+    public CurtainCardView(@NonNull Context context, @Nullable AttributeSet attrs, @AttrRes int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         init(context, attrs);
     }
 
     private void init(Context context, @Nullable AttributeSet attrs) {
-        this.model = new DomModel();
         View root = inflate(context, R.layout.card_layout, this);
         this.cardView = (CardView) root.findViewById(R.id.cardView);
         this.handler = new Handler();
@@ -63,9 +59,9 @@ public class DomCard extends FrameLayout {
         this.button.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                showShader(!model.isOpen());
+                showShader(!isOpen);
                 Animation rotate;
-                if (model.isOpen()) {
+                if (isOpen) {
                     button.setImageResource(icon);
                     rotate = new RotateAnimation(180, 0, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
                 } else {
@@ -75,17 +71,17 @@ public class DomCard extends FrameLayout {
                 rotate.setDuration(300);
                 rotate.setFillAfter(true);
                 button.startAnimation(rotate);
-                model.toggle();
+                isOpen = !isOpen;
             }
         });
         if (attrs != null) {
-            TypedArray attributes = context.obtainStyledAttributes(attrs, R.styleable.DomCard);
-            int resId = attributes.getResourceId(R.styleable.DomCard_buttonIcon, 0);
+            TypedArray attributes = context.obtainStyledAttributes(attrs, R.styleable.CurtainCardView);
+            int resId = attributes.getResourceId(R.styleable.CurtainCardView_buttonIcon, 0);
             if (resId != 0) {
                 this.button.setImageResource(resId);
                 this.icon = resId;
             }
-            int color = attributes.getColor(R.styleable.DomCard_buttonColor, 0);
+            int color = attributes.getColor(R.styleable.CurtainCardView_buttonColor, 0);
             if (color != 0) {
                 button.setBackgroundTintList(ColorStateList.valueOf(color));
             }
@@ -169,14 +165,11 @@ public class DomCard extends FrameLayout {
         }
     }
 
-    public void setModel(IDomModel model) {
-        this.model = model;
-    }
 
     @Override
     public boolean performClick() {
         if (shaderContainer.getLayoutParams() != null)
             this.button.performClick();
-        return model.isOpening();
+        return isOpen;
     }
 }
