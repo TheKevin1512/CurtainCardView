@@ -31,7 +31,7 @@ public class CurtainCardView extends FrameLayout {
     private CardView cardView;
     private FloatingActionButton button;
 
-    private View shaderContainer;
+    private View curtain;
     private int icon = R.drawable.ic_open;
     private boolean isOpen;
 
@@ -59,7 +59,7 @@ public class CurtainCardView extends FrameLayout {
         this.button.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                showShader(!isOpen);
+                showCurtain(!isOpen);
                 Animation rotate;
                 if (isOpen) {
                     button.setImageResource(icon);
@@ -87,23 +87,23 @@ public class CurtainCardView extends FrameLayout {
             }
             attributes.recycle();
         }
-        this.shaderContainer = new LinearLayout(context);
-        this.shaderContainer.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, 0));
-        this.shaderContainer.setBackgroundColor(button.getBackgroundTintList().getDefaultColor());
+        this.curtain = new LinearLayout(context);
+        this.curtain.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, 0));
+        this.curtain.setBackgroundColor(button.getBackgroundTintList().getDefaultColor());
     }
 
-    public View getShaderContainer() {
-        return shaderContainer;
+    public View getCurtain() {
+        return curtain;
     }
 
-    public void setShaderContainer(View view) {
+    public void setCurtain(View view) {
         if (view == null) return;
-        this.shaderContainer = view;
-        this.shaderContainer.setBackgroundColor(button.getBackgroundTintList().getDefaultColor());
+        this.curtain = view;
+        this.curtain.setBackgroundColor(button.getBackgroundTintList().getDefaultColor());
     }
 
-    private void showShader(final boolean enabled) {
-        final ViewGroup.LayoutParams params = shaderContainer.getLayoutParams();
+    private void showCurtain(final boolean enabled) {
+        final ViewGroup.LayoutParams params = curtain.getLayoutParams();
         handler.removeCallbacks(animation);
         animation = new Runnable() {
             private float delta = 1.2f;
@@ -131,7 +131,7 @@ public class CurtainCardView extends FrameLayout {
                         delta = 1.2f;
                     }
                 }
-                shaderContainer.setLayoutParams(params);
+                curtain.setLayoutParams(params);
             }
         };
         handler.postDelayed(animation, RENDER_TIME);
@@ -157,8 +157,8 @@ public class CurtainCardView extends FrameLayout {
                         childViewHandler.postDelayed(this, 50);
                     }
                     else {
-                        cardView.addView(shaderContainer);
-                        shaderContainer.getLayoutParams().height = 0;
+                        cardView.addView(curtain);
+                        curtain.getLayoutParams().height = 0;
                     }
                 }
             }, 50);
@@ -168,7 +168,7 @@ public class CurtainCardView extends FrameLayout {
 
     @Override
     public boolean performClick() {
-        if (shaderContainer.getLayoutParams() != null)
+        if (curtain.getLayoutParams() != null)
             this.button.performClick();
         return isOpen;
     }

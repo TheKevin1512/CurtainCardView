@@ -59,7 +59,7 @@ public class CurtainCardView extends FrameLayout {
         this.button.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                showShader(!isOpen);
+                showCurtain(!isOpen);
                 Animation rotate;
                 if (isOpen) {
                     button.setImageResource(icon);
@@ -92,17 +92,17 @@ public class CurtainCardView extends FrameLayout {
         this.shaderContainer.setBackgroundColor(button.getBackgroundTintList().getDefaultColor());
     }
 
-    public View getShaderContainer() {
+    public View getCurtain() {
         return shaderContainer;
     }
 
-    public void setShaderContainer(View view) {
+    public void setCurtain(View view) {
         if (view == null) return;
         this.shaderContainer = view;
         this.shaderContainer.setBackgroundColor(button.getBackgroundTintList().getDefaultColor());
     }
 
-    private void showShader(final boolean enabled) {
+    private void showCurtain(final boolean enabled) {
         final ViewGroup.LayoutParams params = shaderContainer.getLayoutParams();
         handler.removeCallbacks(animation);
         animation = new Runnable() {
