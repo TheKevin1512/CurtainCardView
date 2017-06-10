@@ -1,5 +1,5 @@
-# CustomCardView
-More material and dynamic than ever before... The CardView of the future!
+# CurtainCardView
+More material and dynamic than ever before... Decorate your app with the cardview of the future!
 
 ![](http://i.imgur.com/r6UJ90o.png?1) ![](http://i.imgur.com/hRn7ZIw.png?1) ![](http://i.imgur.com/xE7GmCN.gif)
 
