@@ -1,4 +1,4 @@
-package dom.studios;
+package dom.studios.curtaincard;
 
 import org.junit.Test;
 

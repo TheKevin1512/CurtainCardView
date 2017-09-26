@@ -1,4 +1,4 @@
-package dom.studios;
+package dom.studios.curtaincard;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;

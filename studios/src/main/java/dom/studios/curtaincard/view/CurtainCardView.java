@@ -1,4 +1,4 @@
-package dom.studios.view;
+package dom.studios.curtaincard.view;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
@@ -17,7 +17,8 @@ import android.view.animation.RotateAnimation;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
-import dom.studios.R;
+import dom.studios.curtaincard.R;
+
 
 /**
  * Created by kevindom on 31/05/17.
