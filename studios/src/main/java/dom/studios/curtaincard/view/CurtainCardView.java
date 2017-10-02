@@ -78,10 +78,7 @@ public class CurtainCardView extends FrameLayout {
         if (attrs != null) {
             TypedArray attributes = context.obtainStyledAttributes(attrs, R.styleable.CurtainCardView);
             int resId = attributes.getResourceId(R.styleable.CurtainCardView_buttonIcon, 0);
-            if (resId != 0) {
-                this.button.setImageResource(resId);
-                this.icon = resId;
-            }
+            if (resId != 0) setIcon(resId);
             int color = attributes.getColor(R.styleable.CurtainCardView_buttonColor, 0);
             if (color != 0) {
                 button.setBackgroundTintList(ColorStateList.valueOf(color));
@@ -139,6 +136,7 @@ public class CurtainCardView extends FrameLayout {
     }
 
     public void setIcon(int icon) {
+        this.button.setImageResource(icon);
         this.icon = icon;
     }
 
