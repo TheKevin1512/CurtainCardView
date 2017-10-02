@@ -138,6 +138,10 @@ public class CurtainCardView extends FrameLayout {
         handler.postDelayed(animation, RENDER_TIME);
     }
 
+    public void setIcon(int icon) {
+        this.icon = icon;
+    }
+
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
