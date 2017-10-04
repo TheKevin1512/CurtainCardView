@@ -2,6 +2,7 @@ package dom.shimmer;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 
@@ -18,6 +19,9 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         this.cardView = (CurtainCardView) findViewById(R.id.domCard);
+        View curtain = LayoutInflater.from(getApplicationContext()).inflate(R.layout.shader_layout, cardView, false);
+        this.cardView.setCurtain(curtain);
+
         this.button = (Button) findViewById(R.id.btn);
         this.button.setOnClickListener(new View.OnClickListener() {
             @Override

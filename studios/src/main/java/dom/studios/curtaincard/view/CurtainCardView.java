@@ -3,7 +3,7 @@ package dom.studios.curtaincard.view;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
-import android.os.Handler;
+import android.graphics.Color;
 import android.support.annotation.AttrRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -11,31 +11,28 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.CardView;
 import android.util.AttributeSet;
 import android.view.View;
-import android.view.ViewGroup;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.RotateAnimation;
 import android.widget.FrameLayout;
-import android.widget.LinearLayout;
 
 import dom.studios.curtaincard.R;
-
+import dom.studios.curtaincard.animation.ResizeAnimation;
 
 /**
  * Created by kevindom on 31/05/17.
  */
 
 public class CurtainCardView extends FrameLayout {
-    private static final int RENDER_TIME = 24;
-
-    private Handler handler;
-    private Runnable animation;
     private CardView cardView;
     private FloatingActionButton button;
 
-    private View shaderContainer;
+    private View curtain;
     private int icon = R.drawable.ic_open;
     private boolean isOpen;
 
+    private int height;
+    private int width;
 
     public CurtainCardView(@NonNull Context context) {
         super(context);
@@ -55,7 +52,6 @@ public class CurtainCardView extends FrameLayout {
     private void init(Context context, @Nullable AttributeSet attrs) {
         View root = inflate(context, R.layout.card_layout, this);
         this.cardView = (CardView) root.findViewById(R.id.cardView);
-        this.handler = new Handler();
         this.button = (FloatingActionButton) root.findViewById(R.id.floatingActionButton);
         this.button.setOnClickListener(new OnClickListener() {
             @Override
@@ -75,64 +71,15 @@ public class CurtainCardView extends FrameLayout {
                 isOpen = !isOpen;
             }
         });
-        if (attrs != null) {
-            TypedArray attributes = context.obtainStyledAttributes(attrs, R.styleable.CurtainCardView);
-            int resId = attributes.getResourceId(R.styleable.CurtainCardView_buttonIcon, 0);
-            if (resId != 0) setIcon(resId);
-            int color = attributes.getColor(R.styleable.CurtainCardView_buttonColor, 0);
-            if (color != 0) {
-                button.setBackgroundTintList(ColorStateList.valueOf(color));
-            }
-            attributes.recycle();
-        }
-        this.shaderContainer = new LinearLayout(context);
-        this.shaderContainer.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, 0));
-        this.shaderContainer.setBackgroundColor(button.getBackgroundTintList().getDefaultColor());
+        applyStyling(context.obtainStyledAttributes(attrs, R.styleable.CurtainCardView));
     }
 
-    public View getCurtain() {
-        return shaderContainer;
-    }
-
-    public void setCurtain(View view) {
-        if (view == null) return;
-        this.shaderContainer = view;
-        this.shaderContainer.setBackgroundColor(button.getBackgroundTintList().getDefaultColor());
-    }
-
-    private void showCurtain(final boolean enabled) {
-        final ViewGroup.LayoutParams params = shaderContainer.getLayoutParams();
-        handler.removeCallbacks(animation);
-        animation = new Runnable() {
-            private float delta = 1.2f;
-
-            @Override
-            public void run() {
-                invalidate();
-                delta += 0.2;
-                if (enabled) {
-                    if (params.height < cardView.getMeasuredHeight()) {
-                        if (params.height <= 0) params.height = 10;
-                        params.height = (int) (params.height * delta);
-                        handler.postDelayed(this, RENDER_TIME);
-                    } else {
-                        params.height = LayoutParams.MATCH_PARENT;
-                        delta = 1.2f;
-                    }
-                } else {
-                    if (params.height == LayoutParams.MATCH_PARENT)
-                        params.height = cardView.getHeight();
-                    if (params.height > 0) {
-                        params.height = (int) (params.height / delta);
-                        handler.postDelayed(this, RENDER_TIME);
-                    } else {
-                        delta = 1.2f;
-                    }
-                }
-                shaderContainer.setLayoutParams(params);
-            }
-        };
-        handler.postDelayed(animation, RENDER_TIME);
+    private void applyStyling(TypedArray attributes) {
+        int resId = attributes.getResourceId(R.styleable.CurtainCardView_buttonIcon, icon);
+        setIcon(resId);
+        int color = attributes.getColor(R.styleable.CurtainCardView_buttonColor, Color.CYAN);
+        button.setBackgroundTintList(ColorStateList.valueOf(color));
+        attributes.recycle();
     }
 
     public void setIcon(int icon) {
@@ -140,38 +87,88 @@ public class CurtainCardView extends FrameLayout {
         this.icon = icon;
     }
 
+    public View getCurtain() {
+        return curtain;
+    }
+
+    public void setCurtain(View view) {
+        if (view == null) return;
+        if (curtain != null) cardView.removeView(curtain);
+        this.curtain = view;
+        this.curtain.setVisibility(INVISIBLE);
+        this.curtain.setBackgroundColor(button.getBackgroundTintList().getDefaultColor());
+        this.cardView.addView(curtain);
+    }
+
+    private void showCurtain(final boolean enabled) {
+        if (curtain == null) return;
+        Animation resizeAnimation;
+
+        if (enabled) {
+            resizeAnimation = new ResizeAnimation(
+                    curtain,
+                    width == 0 ? curtain.getWidth() : width,
+                    0,
+                    width == 0 ? curtain.getWidth() : width,
+                    height== 0 ? curtain.getHeight(): height
+            );
+        } else {
+            resizeAnimation = new ResizeAnimation(curtain,
+                    width == 0 ? curtain.getWidth() : width,
+                    height== 0 ? curtain.getHeight() : height,
+                    width == 0 ? curtain.getWidth() : width,
+                    0
+            );
+        }
+        resizeAnimation.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+                if (isOpen)
+                    curtain.setVisibility(VISIBLE);
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                if (!isOpen)
+                    curtain.setVisibility(GONE);
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+        });
+        resizeAnimation.setInterpolator(new AccelerateDecelerateInterpolator());
+        resizeAnimation.setFillAfter(true);
+        startAnimation(resizeAnimation);
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        if (this.height == 0) this.height = cardView.getHeight();
+        if (this.width == 0) this.width = cardView.getWidth();
+    }
+
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        final int childCount = getChildCount();
-        if (childCount > 0) {
-            final Handler childViewHandler = new Handler();
-            childViewHandler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    if (cardView.getChildCount() != childCount - 2) {
-                        for (int i = 0; i < childCount; i++) {
-                            View v = getChildAt(i);
-                            if (v != null && !v.equals(cardView) && !v.equals(button)) {
-                                removeView(v);
-                                cardView.addView(v);
-                            }
-                        }
-                        childViewHandler.postDelayed(this, 50);
-                    }
-                    else {
-                        cardView.addView(shaderContainer);
-                        shaderContainer.getLayoutParams().height = 0;
-                    }
-                }
-            }, 50);
+        int childCount = getChildCount();
+        for (int i = childCount - 1; i >= 0; i--) {
+            View viewToMove = getChildAt(i);
+            if (!(viewToMove.equals(cardView)) && !(viewToMove.equals(button))) {
+                removeView(viewToMove);
+                cardView.addView(viewToMove);
+            }
         }
+        if (curtain != null)
+            cardView.addView(curtain);
     }
 
 
     @Override
     public boolean performClick() {
-        if (shaderContainer.getLayoutParams() != null)
+        if (curtain.getLayoutParams() != null)
             this.button.performClick();
         return isOpen;
     }
